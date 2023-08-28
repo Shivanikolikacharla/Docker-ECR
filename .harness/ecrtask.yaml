@@ -37,3 +37,39 @@ pipeline:
                       roleArn: ""
                   timeout: 10m
         tags: {}
+    - stage:
+        name: ecs-cluster-deploy
+        identifier: ecsclusterdeploy
+        description: ""
+        type: Deployment
+        spec:
+          deploymentType: ECS
+          service:
+            serviceRef: ecsservice
+          environment:
+            environmentRef: ecsenv
+            deployToAll: false
+            infrastructureDefinitions:
+              - identifier: ecsinf
+          execution:
+            steps:
+              - step:
+                  name: ECS Rolling Deploy
+                  identifier: ecsRollingDeploy
+                  type: EcsRollingDeploy
+                  timeout: 10m
+                  spec: {}
+            rollbackSteps:
+              - step:
+                  name: ECS Rolling Rollback
+                  identifier: ecsRollingRollback
+                  type: EcsRollingRollback
+                  timeout: 10m
+                  spec: {}
+        tags: {}
+        failureStrategies:
+          - onFailure:
+              errors:
+                - AllErrors
+              action:
+                type: StageRollback
